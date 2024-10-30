@@ -45,6 +45,7 @@ def carro_estacionar():
             return jsonify({"message": "Carro já está estacionado!"}), 400
         carro.status = 'estacionado'  # Atualiza o status para 'estacionado'
     db.session.commit()
+    return jsonify({"message": "Entrada registrada com sucesso!"}), 200
 
 @app.route('/sair', methods=['POST'])
 def carro_sair():
@@ -60,6 +61,7 @@ def carro_sair():
         else:
             return jsonify({"message": "Carro não registrou entrada!"}), 400
     db.session.commit()
+    return jsonify({"message": "Saída registrada com sucesso!"}), 200
 
 @app.route('/carros', methods=['GET'])
 def get_carros():
