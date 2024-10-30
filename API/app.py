@@ -22,9 +22,16 @@ class Carro(db.Model):
 def reservar_carro():
     dados = request.json
     carro = Carro.query.filter_by(placa=dados['placa']).first()
+    
     if carro:
+        if carro.reserva:  # Verifica se já existe uma reserva
+            return jsonify({"message": "Carro já está reservado."}), 400
+        
         carro.reserva = dados['reserva']
-    db.session.commit()
+        db.session.commit()
+        return jsonify({"message": "Reserva atualizada com sucesso!"}), 200
+    else:
+        return jsonify({"message": "Carro não encontrado."}), 404
 
 @app.route('/estacionar', methods=['POST'])
 def carro_estacionar():
