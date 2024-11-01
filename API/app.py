@@ -10,6 +10,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhos
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+sensores_inativos = None
+
 class Carro(db.Model):
     __tablename__ = 'carros'
     carro_id = db.Column(db.Integer, primary_key=True)
@@ -62,6 +64,20 @@ def carro_sair():
             return jsonify({"message": "Carro não registrou entrada!"}), 400
     db.session.commit()
     return jsonify({"message": "Saída registrada com sucesso!"}), 200
+
+@app.route('/vagas', methods=['POST'])
+def vagas_disponiveis():
+    global sensores_inativos
+    dados = request.json
+    sensores_inativos = dados.get('sensores_inativos')
+    return jsonify({"message": "Número de sensores inativos atualizado com sucesso!"}), 200
+    
+@app.route('/vagas', methods=['GET'])
+def get_vagas_disponiveis():
+    if sensores_inativos is not None:
+        return jsonify({"sensores_inativos": sensores_inativos}), 200
+    else:
+        return jsonify({"message": "Número de sensores inativos ainda não atualizado."}), 404
 
 @app.route('/carros', methods=['GET'])
 def get_carros():
