@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from urllib.parse import unquote
 
 app = Flask(__name__)
 CORS(app)
 
-# Configuração da URI de conexão com o banco de dados PostgreSQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/carros_estacionamento'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -27,7 +27,7 @@ def reservar_carro():
     carro = Carro.query.filter_by(placa=dados['placa']).first()
     
     if carro:
-        if carro.reserva:  # Verifica se já existe uma reserva
+        if carro.reserva: 
             return jsonify({"message": "Carro já está reservado."}), 400
         
         carro.reserva = dados['reserva']
@@ -46,7 +46,7 @@ def carro_estacionar():
     if carro:
         if carro.status == 'estacionado':
             return jsonify({"message": "Carro já está estacionado!"}), 400
-        carro.status = 'estacionado'  # Atualiza o status para 'estacionado'
+        carro.status = 'estacionado'  
     db.session.commit()
     return jsonify({"message": "Entrada registrada com sucesso!"}), 200
 
@@ -59,8 +59,8 @@ def carro_sair():
     
     if carro:
         if carro.status == 'estacionado':
-            carro.status = ''  # Atualiza o status para vazio
-            carro.reserva = '' # Atualiza a reserva para vazia
+            carro.status = ''  
+            carro.reserva = ''
         else:
             return jsonify({"message": "Carro não registrou entrada!"}), 400
     db.session.commit()
@@ -82,10 +82,8 @@ def get_vagas_disponiveis():
 
 @app.route('/carros', methods=['GET'])
 def get_carros():
-    # Faz a consulta para obter todos os carros do banco de dados
     carros = Carro.query.all()
 
-    # Transforma o resultado da consulta em um formato JSON
     carros_list = [{'placa': carro.placa, 'nome': carro.nome, 'status': carro.status, 'reserva': carro.reserva} for carro in carros]
     return jsonify(carros_list), 200
 
@@ -98,10 +96,20 @@ def get_carro(tag):
 
 @app.route('/login/<username>', methods=['GET'])
 def get_user(username):
-    carro = Carro.query.filter_by(nome=username).first()
-    if carro is None:
-        return jsonify({"message": "Carro não encontrado."}), 404
-    return jsonify({"placa": carro.placa, "modelo": carro.modelo, "Status": carro.status, "reserva": carro.reserva}), 200
+    username = unquote(username)
+    carros = Carro.query.filter_by(nome=username).all()
+
+    if not carros:
+        return jsonify({"message": "Nenhum carro encontrado para este usuário."}), 404
+    
+    carros_data = [{
+        "placa": carro.placa,
+        "modelo": carro.modelo,
+        "status": carro.status,
+        "reserva": carro.reserva
+    } for carro in carros]
+    
+    return jsonify(carros_data), 200
 
 
 if __name__ == '__main__':
