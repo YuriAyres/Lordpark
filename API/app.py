@@ -97,7 +97,7 @@ def get_carro(tag):
     return jsonify({"placa": carro.placa, "nome": carro.nome, "Status": carro.status, "reserva": carro.reserva}), 200
 
 @app.route('/login/<username>', methods=['GET'])
-def get_carro(username):
+def get_user(username):
     carro = Carro.query.filter_by(nome=username).first()
     if carro is None:
         return jsonify({"message": "Carro não encontrado."}), 404
