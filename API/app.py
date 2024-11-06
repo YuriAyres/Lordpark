@@ -19,6 +19,7 @@ class Carro(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     status = db.Column(db.Text, nullable=True)
     reserva = db.Column(db.Text, nullable=True)
+    modelo = db.Column(db.Text, nullable=True)
 
 @app.route('/reservar', methods=['POST'])
 def reservar_carro():
