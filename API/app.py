@@ -26,15 +26,21 @@ class Carro(db.Model):
 @app.route('/pagar', methods=['POST'])
 def pagar():
     dados = request.json
-    user = Carro.query.filter_by(nome=dados['nome']).all()
+    carros = Carro.query.filter_by(nome=dados['nome']).all()  # Recupera todos os carros com o nome fornecido
     
-    if user:
-        if user.valor == 0: 
-            return jsonify({"message": "Não há valor a ser pago."}), 400
+    if carros:
+        # Cria uma lista com o valor de cada carro
+        valores = [carro.valor for carro in carros]
         
-        user.valor = 0
-        db.session.commit()
-        return jsonify({"message": "Pagamento realizado com sucesso!"}), 200
+        # Verifica se há algum carro com valor maior que 0
+        if any(valor > 0 for valor in valores):
+            # Zera o valor de todos os carros
+            for carro in carros:
+                carro.valor = 0
+            db.session.commit()
+            return jsonify({"message": "Pagamento realizado com sucesso!"}), 200
+        else:
+            return jsonify({"message": "Não há valor a ser pago."}), 400
     else:
         return jsonify({"message": "Carro não encontrado."}), 404
      
