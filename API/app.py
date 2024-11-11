@@ -20,6 +20,24 @@ class Carro(db.Model):
     status = db.Column(db.Text, nullable=True)
     reserva = db.Column(db.Text, nullable=True)
     modelo = db.Column(db.Text, nullable=True)
+    tempo = db.Column(db.Text, nullable=True)
+    valor = db.Column(db.Float, nullable=True)
+    
+@app.route('/pagar', methods=['POST'])
+def pagar():
+    dados = request.json
+    carro = Carro.query.filter_by(placa=dados['placa']).first()
+    
+    if carro:
+        if carro.valor == 0: 
+            return jsonify({"message": "Não há valor a ser pago."}), 400
+        
+        carro.valor = 0
+        db.session.commit()
+        return jsonify({"message": "Pagamento realizado com sucesso!"}), 200
+    else:
+        return jsonify({"message": "Carro não encontrado."}), 404
+     
 
 @app.route('/reservar', methods=['POST'])
 def reservar_carro():
@@ -35,18 +53,21 @@ def reservar_carro():
         return jsonify({"message": "Reserva atualizada com sucesso!"}), 200
     else:
         return jsonify({"message": "Carro não encontrado."}), 404
+    
 
 @app.route('/estacionar', methods=['POST'])
 def carro_estacionar():
     dados = request.json
     carro_id = dados.get('carro_id')
+    tempo = dados.get('tempo')
     
     carro = Carro.query.get(carro_id)
     
     if carro:
         if carro.status == 'estacionado':
             return jsonify({"message": "Carro já está estacionado!"}), 400
-        carro.status = 'estacionado'  
+        carro.status = 'estacionado' 
+        carro.tempo = tempo
     db.session.commit()
     return jsonify({"message": "Entrada registrada com sucesso!"}), 200
 
@@ -54,13 +75,16 @@ def carro_estacionar():
 def carro_sair():
     dados = request.json
     carro_id = dados.get('carro_id')
+    valor = dados.get('valor')
     
     carro = Carro.query.get(carro_id)
     
     if carro:
         if carro.status == 'estacionado':
+            carro.valor = valor
             carro.status = ''  
             carro.reserva = ''
+            carro.tempo = ''
         else:
             return jsonify({"message": "Carro não registrou entrada!"}), 400
     db.session.commit()
@@ -92,7 +116,7 @@ def get_carro(tag):
     carro = Carro.query.filter_by(carro_id=tag).first()
     if carro is None:
         return jsonify({"message": "Carro não encontrado."}), 404
-    return jsonify({"placa": carro.placa, "nome": carro.nome, "Status": carro.status, "reserva": carro.reserva}), 200
+    return jsonify({"placa": carro.placa, "nome": carro.nome, "Status": carro.status, "reserva": carro.reserva, "tempo": carro.tempo, "valor":carro.valor}), 200
 
 @app.route('/login/<username>', methods=['GET'])
 def get_user(username):
