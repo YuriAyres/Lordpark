@@ -21,7 +21,7 @@ class Carro(db.Model):
     reserva = db.Column(db.Text, nullable=True)
     modelo = db.Column(db.Text, nullable=True)
     tempo = db.Column(db.Text, nullable=True)
-    valor = db.Column(db.Float, nullable=True)
+    valor = db.Column(db.Real, nullable=True)
     
 @app.route('/pagar', methods=['POST'])
 def pagar():
