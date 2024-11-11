@@ -26,13 +26,13 @@ class Carro(db.Model):
 @app.route('/pagar', methods=['POST'])
 def pagar():
     dados = request.json
-    carro = Carro.query.filter_by(placa=dados['placa']).first()
+    user = Carro.query.filter_by(nome=dados['nome']).all()
     
-    if carro:
-        if carro.valor == 0: 
+    if user:
+        if user.valor == 0: 
             return jsonify({"message": "Não há valor a ser pago."}), 400
         
-        carro.valor = 0
+        user.valor = 0
         db.session.commit()
         return jsonify({"message": "Pagamento realizado com sucesso!"}), 200
     else:
