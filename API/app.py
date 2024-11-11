@@ -48,7 +48,7 @@ def reservar_carro():
         if carro.reserva: 
             return jsonify({"message": "Carro já está reservado."}), 400
         
-        carro.reserva = dados['reserva']
+        carro.reserva = 'reservado'
         db.session.commit()
         return jsonify({"message": "Reserva atualizada com sucesso!"}), 200
     else:
