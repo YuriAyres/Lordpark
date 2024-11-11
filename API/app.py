@@ -130,7 +130,9 @@ def get_user(username):
         "placa": carro.placa,
         "modelo": carro.modelo,
         "status": carro.status,
-        "reserva": carro.reserva
+        "reserva": carro.reserva,
+        "tempo":carro.tempo,
+        "valor":carro.valor
     } for carro in carros]
     
     return jsonify(carros_data), 200
